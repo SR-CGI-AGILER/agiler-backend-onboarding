@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/SR-CGI-AGILER/agiler-backend-onboarding/issues"
   },
-  "homepage": "https://github.com/SR-CGI-AGILER/agiler-backend-onboarding#readme"
+  "homepage": "https://github.com/SR-CGI-AGILER/agiler-backend-onboarding#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql": "^2.16.0",
+    "superagent": "^4.0.0-beta.5",
+    "uuid": "^3.3.2"
+  }
 }
