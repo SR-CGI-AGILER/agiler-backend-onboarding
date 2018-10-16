@@ -1,12 +1,12 @@
-#Server for Onboarding MicroService
+# Server for Onboarding MicroService
 
-##Running on port 4000
+## Running on port 4000
 
-###Pre-requisites:
+### Pre-requisites:
 
-> >run the sql script 'create-tables.sql' by typing the following command in mysql shell
+> > run the sql script 'create-tables.sql' by typing the following command in mysql shell
 
-> >SOURCE create-tables.sql;
+> > SOURCE create-tables.sql;
 
->> run npm install
+> > run npm install
 
