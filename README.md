@@ -6,7 +6,7 @@
 
 + run the sql script 'create-tables.sql' by typing the following command in mysql shell
 
-+ SOURCE create-tables.sql;
+     SOURCE create-tables.sql;
 
 + run npm install
 
