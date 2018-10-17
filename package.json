@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/SR-CGI-AGILER/agiler-backend-onboarding#readme",
   "dependencies": {
+    "async": "^2.6.1",
     "express": "^4.16.4",
     "mysql": "^2.16.0",
     "superagent": "^4.0.0-beta.5",

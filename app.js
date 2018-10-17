@@ -1,7 +1,7 @@
 const express = require('express');
 //const request = require('superagent');
 
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 const onboarding = require('./api/onboarding/index');
 
