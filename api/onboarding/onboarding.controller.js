@@ -225,7 +225,7 @@ function getUserData(tokendata, cb){
     // let access_token = tokendata.text).access_token;     
     //console.log(access_token, "get User DAATA funtion ")
     if(tokendata.access_token){
-        console.log("dadasd")
+        // console.log("dadasd")
         request
         .get(`https://api.github.com/user`)
         .set({
@@ -237,7 +237,7 @@ function getUserData(tokendata, cb){
             // console.log(typeof data.statusCode);
             if(JSON.parse(data.statusCode === 200)){
                 const obj = Object.assign(tokendata, JSON.parse(data.text));
-                console.log(obj);
+                // console.log(obj);
                 return cb(null, obj);
             }
             else{
@@ -257,7 +257,7 @@ function saveData(newdata, cb){
     // console.log(arg2);
     // console.log(JSON.parse(data.text).name, 'in save data')
     // let userdata = JSON.parse(newdata.text);
-    console.log(newdata,"in savedata");
+    // console.log(newdata,"in savedata");
     onboardingDao.addRecord(newdata.name,newdata.email,newdata.avatar_url)
         .then(data =>{
             if(data === 'OK')
