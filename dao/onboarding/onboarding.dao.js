@@ -101,7 +101,7 @@ function addRecord(name,email,profilePicUrl){
             console.log(data)
             if(data  === "true"){
                 console.log('Already Exists');
-                reject('Already Exists');
+                resolve('Already');
             }
             else{
                 let id = uuidv4();

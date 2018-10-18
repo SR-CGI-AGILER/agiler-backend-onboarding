@@ -132,6 +132,9 @@ function saveGoogleData(data, cb){
         .then(newdata =>{
             if(newdata === 'OK')
                 return cb(null, data);
+            else if(newdata === 'Already'){
+                return cb(null, data);
+            }
             else{
                 res.status('401').send({                    
                     payload: {
