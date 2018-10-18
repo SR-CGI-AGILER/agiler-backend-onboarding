@@ -3,13 +3,53 @@ const request = require('superagent');
 const keys = require('../../config/keys');
 
 const waterfall = require('async/waterfall');
-const async = require('async')
+const async = require('async');
 
-function def(req, res){
+function getAllUsers(req, res) {
+    let data = {
+        userid : req.params.id
+    }
+    onboardingDao.findRecord(data).then(data => {
+        res.status('200').send({
+            payload: data
+        });
+    });
+}
+
+function getTeam(req,res){
+    let data = {
+        teamId: req.params.teamId
+    }
+    onboardingDao.findTeam(data).then(data=>{
+        res.status('200').send({
+           payload: {
+                length: data.length,
+                results: data.results
+           }
+        })
+    })
+}
+
+function getTeamMembers(req, res){
+    let data = {
+        teamId: req.params.teamId        
+    }
+    onboardingDao.findTeamMembers(data).then(data=>{
+        res.status('200').send({
+            payload : {
+                length: data.length,
+                results: data.results
+            }
+        });
+    });
+}
+
+function loginWithGoogle(req, res){
+    console.log("WATERFALL.............................")
     async.waterfall([
         async.apply(getGoogleToken, req, res),
         getGoogleUserData,
-        saveData,
+        saveGoogleData,
         async.apply(sendResponse, res)
     ], function(err, results){
 
@@ -17,6 +57,7 @@ function def(req, res){
 }
 
 function getGoogleToken(req, res, cb){
+    console.log("inside get google Token")
     request
     .post('https://www.googleapis.com/oauth2/v3/token')
     .set({
@@ -26,14 +67,19 @@ function getGoogleToken(req, res, cb){
     .send({
       'code': req.body.code,
       'redirect_uri': 'http://localhost:4200/torii/redirect.html',
-      'client_id': keys.google.clientID,
-      'client_secret': keys.google.clientSecret,
+      'client_id': '1053797418071-cb49noe362osfv37v0jc25bkvqbum5qp.apps.googleusercontent.com',
+      'client_secret': '7o6XfydcFK7neYRbOJs2Kuze',
       'grant_type': 'authorization_code',
       'scope': '',
 
     }).then(data => {
-        if(data.access_token){
-            return cb(null, data);
+        // console.log(data);
+        // console.log(data,"google")
+        // console.log(data,"google");
+        // res.send(JSON.parse(data.text));
+        if(data.body.access_token){
+            console.log(data.body.access_token,"access");
+            return cb(null, data.body);
         }
         else{
             res.status().send({
@@ -45,19 +91,24 @@ function getGoogleToken(req, res, cb){
     })
 }
 
-function getGoogleUserData(data ,cb){
-    let access_token = data.access_token;
-    if(access_token){
+function getGoogleUserData(tokendata ,cb){
+    console.log( "inside getGoogleUserData")
+    let access_token = tokendata.access_token;
+    // if(true){
         request
-        .get(`https://api.github.com/user`)
+        .get(`https://www.googleapis.com/oauth2/v2/userinfo`)
         .set({
-            'Authorization': `token ${access_token}`
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Authorization': `Bearer ${access_token}`
         })
         .send({
         })
-        .then(data=>{
+        .then((data)=>{
+            // console.log(err,"aftereturnr getdata");
             if(data.statusCode === 200){
-                return cb(null, data);
+                const obj = Object.assign(tokendata, JSON.parse(data.text));
+                return cb(null, obj);
             }
             else{
                 res.status('401').send({
@@ -66,8 +117,29 @@ function getGoogleUserData(data ,cb){
                     }
                 })
             }
+        }).catch(err => { 
+            console.log("asdjhajksd", err)
         })
-    }
+    // }
+}
+
+function saveGoogleData(data, cb){
+    // console.log(arg2);
+    // console.log(JSON.parse(data.text).name, 'in save data')
+    // let userdata = JSON.parse(data.text);
+    //console.log(userdata);
+    onboardingDao.addRecord(data.name,data.email,data.picture)
+        .then(newdata =>{
+            if(newdata === 'OK')
+                return cb(null, data);
+            else{
+                res.status('401').send({                    
+                    payload: {
+                        msg: 'Unauthorized'
+                    }
+                });
+            }
+        })
 }
 
 // function getGoogleToken(req, res){
@@ -102,7 +174,7 @@ function getGoogleUserData(data ,cb){
 //      })
 // }
 
-function abc(req, res){
+function loginWithGithub(req, res){
     async.waterfall([
         async.apply(getGithubToken, req, res),
         getUserData,
@@ -114,7 +186,7 @@ function abc(req, res){
 }
 
 function getGithubToken(req, res,cb){
-    console.log('here in get github')
+    // console.log('here in get github')
     request
      .post('https://github.com/login/oauth/access_token')
      .set({
@@ -132,7 +204,7 @@ function getGithubToken(req, res,cb){
      }).then(data => {
         //  console.log(data.statusCode);
         if(JSON.parse(data.text).access_token)
-            return cb(null, data);
+            return cb(null, JSON.parse(data.text));
         else{
             res.status('401').send({
                 payload: {
@@ -144,23 +216,26 @@ function getGithubToken(req, res,cb){
 
 }
 
-function getUserData(data, cb){
+function getUserData(tokendata, cb){
     //.then(data => {
-    let access_token = JSON.parse(data.text).access_token;     
-    console.log(access_token, "get User DAATA funtion ")
-    if(access_token){
-        //console.log("dadasd")
+        //console.log(data);
+    // let access_token = tokendata.text).access_token;     
+    //console.log(access_token, "get User DAATA funtion ")
+    if(tokendata.access_token){
+        console.log("dadasd")
         request
         .get(`https://api.github.com/user`)
         .set({
-            'Authorization': `token ${access_token}`
+            'Authorization': `token ${tokendata.access_token}`
         })
         .send({
             // 'access_token': JSON.parse(data.text).access_token
-        }).then(data,access_token=>{
+        }).then(data=>{
             // console.log(typeof data.statusCode);
             if(JSON.parse(data.statusCode === 200)){
-                return cb(null, data, access_token)
+                const obj = Object.assign(tokendata, JSON.parse(data.text));
+                console.log(obj);
+                return cb(null, obj);
             }
             else{
                 res.status('401').send({
@@ -174,17 +249,18 @@ function getUserData(data, cb){
     }
 }
     
-function saveData(data, cb){
-    console.log(JSON.parse(data.text).name, 'in save data')
-    let userdata = JSON.parse(data.text);
-    //console.log(userdata);
-    onboardingDao.addRecord(userdata.name,userdata.email,userdata.avatar_url)
+function saveData(newdata, cb){
+    
+    // console.log(arg2);
+    // console.log(JSON.parse(data.text).name, 'in save data')
+    // let userdata = JSON.parse(newdata.text);
+    console.log(newdata,"in savedata");
+    onboardingDao.addRecord(newdata.name,newdata.email,newdata.avatar_url)
         .then(data =>{
             if(data === 'OK')
-                return cb(null, data);
+                return cb(null, newdata);
             else{
                 res.status('401').send({
-                    
                     payload: {
                         msg: 'Unauthorized'
                     }
@@ -206,6 +282,10 @@ function sendResponse(res, data, cb){
 
 
 module.exports = {
-    getGoogleToken,
-    abc
+    loginWithGoogle,
+    loginWithGithub,
+    getAllUsers,
+    getTeam,
+    getTeamMembers,
+    // getGoogleToken
 }
