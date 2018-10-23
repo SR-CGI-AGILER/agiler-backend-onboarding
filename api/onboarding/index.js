@@ -5,7 +5,9 @@ router.post('/auth/google',onboardingController.loginWithGoogle);
 
 router.post('/auth/github/:code?', onboardingController.loginWithGithub);
 
-router.get('/api/users/:id', onboardingController.getAllUsers);
+router.get('/api/users/:id', onboardingController.getUsers);
+
+router.get('/api/users', onboardingController.getAllUsersController);
 
 router.get('/api/teams/:teamId', onboardingController.getTeam);
 

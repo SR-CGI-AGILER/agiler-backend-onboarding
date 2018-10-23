@@ -20,6 +20,22 @@ function findRecord(data){
     });
 }
 
+function findAllUsers(){
+    return new Promise((resolve, reject)=>{
+        dbConnection.connection.query(`SELECT * from user`,(error, results, fields)=>{
+            if(error){
+                reject(error);
+            }
+            else{
+                if(results)
+                    resolve(results);
+                else
+                    resolve(false);
+            }
+        });
+    });
+}
+
 function findTeam(data){
     return new Promise((resolve,reject)=>{
         dbConnection.connection.query(`SELECT * from team where teamId="${data.teamId}"`, (error, results, fields)=>{
@@ -68,7 +84,7 @@ function findTeamMembers(data){
 }
 
 function checkUser(email){
-    console.log(email,"in check User")
+    // console.log(email,"in check User")
     return new Promise(function (resolve, reject ) {
 
         dbConnection.connection.query(`SELECT * from user where email="${email}"`,
@@ -92,20 +108,28 @@ function checkUser(email){
     })
 }
 
-function addRecord(name,email,profilePicUrl){
-    console.log(email,"IN add record");
+function addRecord(name,email,profilePicUrl,jwtToken){
+    // console.log(email,"IN add record");
     return new Promise((resolve,reject)=>{
         //console.log(email,"addRecordDAO");
         // console.log(checkUser(email),"sdfdsf");
         checkUser(email).then(data=>{
-            console.log(data)
+            // console.log(data)
+            let sessionRecord = {id:uuidv4(), jwtToken: jwtToken };
+            let sessionQuery = dbConnection.connection.query('INSERT INTO session SET ?',
+            sessionRecord, (error, results, fields)=>{
+                if(error){
+                    console.log(error);
+                    reject(error)
+                }
+            });
             if(data  === "true"){
-                console.log('Already Exists');
+                // console.log('Already Exists');
                 resolve('Already');
             }
             else{
                 let id = uuidv4();
-                console.log(id,"this is inside else llolop of addrecord DAO");
+                // console.log(id,"this is inside else llolop of addrecord DAO");
 
                 let newUserRecord = {id:id, name:name, email:email, profilePicUrl:profilePicUrl};
                 let query = dbConnection.connection.query('INSERT INTO user SET ?',
@@ -115,7 +139,7 @@ function addRecord(name,email,profilePicUrl){
                         reject(error)
                     }
                     else {
-                        console.log('Added');
+                        // console.log('Added');
                         resolve('OK')
                     }
                 });
@@ -129,5 +153,6 @@ module.exports = {
     addRecord,
     findRecord,
     findTeam,
-    findTeamMembers
+    findTeamMembers,
+    findAllUsers
 }

@@ -21,7 +21,10 @@
   "dependencies": {
     "async": "^2.6.1",
     "express": "^4.16.4",
+    "jsonwebtoken": "^8.3.0",
     "mysql": "^2.16.0",
+    "passport-local": "^1.0.0",
+    "passport-local-token": "^1.0.1",
     "superagent": "^4.0.0-beta.5",
     "uuid": "^3.3.2"
   }

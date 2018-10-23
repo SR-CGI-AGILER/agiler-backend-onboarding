@@ -5,11 +5,23 @@ const keys = require('../../config/keys');
 const waterfall = require('async/waterfall');
 const async = require('async');
 
-function getAllUsers(req, res) {
+// const passportLocal = require('passport-local').LocalStrategy;
+const jwt = require('jsonwebtoken');
+
+
+function getUsers(req, res) {
     let data = {
         userid : req.params.id
     }
     onboardingDao.findRecord(data).then(data => {
+        res.status('200').send({
+            payload: data
+        });
+    });
+}
+
+function getAllUsersController(req, res) {
+    onboardingDao.findAllUsers().then(data =>{
         res.status('200').send({
             payload: data
         });
@@ -57,7 +69,7 @@ function loginWithGoogle(req, res){
 }
 
 function getGoogleToken(req, res, cb){
-    console.log("inside get google Token")
+    // console.log("inside get google Token")
     request
     .post('https://www.googleapis.com/oauth2/v3/token')
     .set({
@@ -73,12 +85,9 @@ function getGoogleToken(req, res, cb){
       'scope': '',
 
     }).then(data => {
-        // console.log(data);
-        // console.log(data,"google")
-        // console.log(data,"google");
-        // res.send(JSON.parse(data.text));
+        
         if(data.body.access_token){
-            console.log(data.body.access_token,"access");
+            // console.log(data.body.access_token,"access");
             return cb(null, data.body);
         }
         else{
@@ -92,8 +101,9 @@ function getGoogleToken(req, res, cb){
 }
 
 function getGoogleUserData(tokendata ,cb){
-    console.log( "inside getGoogleUserData")
+    // console.log( "inside getGoogleUserData")
     let access_token = tokendata.access_token;
+    
     // if(true){
         request
         .get(`https://www.googleapis.com/oauth2/v2/userinfo`)
@@ -107,7 +117,9 @@ function getGoogleUserData(tokendata ,cb){
         .then((data)=>{
             // console.log(err,"aftereturnr getdata");
             if(data.statusCode === 200){
-                const obj = Object.assign(tokendata, JSON.parse(data.text));
+                let obj = Object.assign(tokendata, JSON.parse(data.text));
+                // let jwt_token = jwt.sign({token: JSON.parse(data.text)}, 'ankit');
+                // console.log(jwt_token);
                 return cb(null, obj);
             }
             else{
@@ -118,7 +130,7 @@ function getGoogleUserData(tokendata ,cb){
                 })
             }
         }).catch(err => { 
-            console.log("asdjhajksd", err)
+            console.log(err);
         })
     // }
 }
@@ -128,12 +140,22 @@ function saveGoogleData(data, cb){
     // console.log(JSON.parse(data.text).name, 'in save data')
     // let userdata = JSON.parse(data.text);
     //console.log(userdata);
-    onboardingDao.addRecord(data.name,data.email,data.picture)
+    let obj = {
+        name: data.name,
+        email: data.email,
+        picture: data.picture
+    }
+    let jwt_token = jwt.sign({token: obj}, 'ankit');
+    let responseObj = {
+        jwtToken : jwt_token,
+        userData : obj
+    }
+    onboardingDao.addRecord(data.name,data.email,data.picture,jwt_token)
         .then(newdata =>{
             if(newdata === 'OK')
-                return cb(null, data);
+                return cb(null, responseObj);
             else if(newdata === 'Already'){
-                return cb(null, data);
+                return cb(null, responseObj);
             }
             else{
                 res.status('401').send({                    
@@ -145,37 +167,7 @@ function saveGoogleData(data, cb){
         })
 }
 
-// function getGoogleToken(req, res){
-//     request
-//      .post('https://www.googleapis.com/oauth2/v3/token')
-//      .set({
-//        'Content-Type': 'application/x-www-form-urlencoded',
-//        'X-Requested-With': 'XMLHttpRequest'
-//      })
-//      .send({
-//        'code': req.body.code,
-//        'redirect_uri': 'http://localhost:4200/torii/redirect.html',
-//        'client_id': keys.google.clientID,
-//        'client_secret': keys.google.clientSecret,
-//        'grant_type': 'authorization_code',
-//        'scope': '',
 
-//      }).then(data => {
-//         if(data.access_token){
-//             request
-//                 .post('https://www.googleapis.com/oauth2/v2/userinfo')
-//                 .set({
-//                     'Content-Type': 'application/x-www-form-urlencoded',
-//                     'X-Requested-With': 'XMLHttpRequest',
-//                     'Authorization': `Bearer ${data.access_token}`
-//                 })
-//         }
-       
-//      }).then(data =>{
-        
-//         res.send(JSON.parse(data.text))
-//      })
-// }
 
 function loginWithGithub(req, res){
     async.waterfall([
@@ -205,7 +197,6 @@ function getGithubToken(req, res,cb){
         'grant_type': 'authorization_code',
         'scope': '',
      }).then(data => {
-        //  console.log(data.statusCode);
         if(JSON.parse(data.text).access_token)
             return cb(null, JSON.parse(data.text));
         else{
@@ -220,24 +211,17 @@ function getGithubToken(req, res,cb){
 }
 
 function getUserData(tokendata, cb){
-    //.then(data => {
-        //console.log(data);
-    // let access_token = tokendata.text).access_token;     
-    //console.log(access_token, "get User DAATA funtion ")
+    
     if(tokendata.access_token){
-        // console.log("dadasd")
         request
         .get(`https://api.github.com/user`)
         .set({
             'Authorization': `token ${tokendata.access_token}`
         })
         .send({
-            // 'access_token': JSON.parse(data.text).access_token
         }).then(data=>{
-            // console.log(typeof data.statusCode);
             if(JSON.parse(data.statusCode === 200)){
                 const obj = Object.assign(tokendata, JSON.parse(data.text));
-                // console.log(obj);
                 return cb(null, obj);
             }
             else{
@@ -253,11 +237,6 @@ function getUserData(tokendata, cb){
 }
     
 function saveData(newdata, cb){
-    
-    // console.log(arg2);
-    // console.log(JSON.parse(data.text).name, 'in save data')
-    // let userdata = JSON.parse(newdata.text);
-    // console.log(newdata,"in savedata");
     onboardingDao.addRecord(newdata.name,newdata.email,newdata.avatar_url)
         .then(data =>{
             if(data === 'OK')
@@ -273,22 +252,17 @@ function saveData(newdata, cb){
 }
     
 function sendResponse(res, data, cb){
+    console.log(data.jwtToken);
     res.send(data);
-    cb(null)
+    cb(null);
 }
-    // .then(data => {
-    //             console.log(JSON.parse(data.text).name)
-    //         })
-    //      }
-         
-    //  })
-
 
 module.exports = {
     loginWithGoogle,
     loginWithGithub,
-    getAllUsers,
+    getUsers,
     getTeam,
     getTeamMembers,
+    getAllUsersController
     // getGoogleToken
 }
