@@ -1,11 +1,7 @@
 const onboardingDao = require('../../dao/onboarding/onboarding.dao');
 const request = require('superagent');
 const keys = require('../../config/keys');
-
-const waterfall = require('async/waterfall');
 const async = require('async');
-
-// const passportLocal = require('passport-local').LocalStrategy;
 const jwt = require('jsonwebtoken');
 
 
