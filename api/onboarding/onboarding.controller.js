@@ -3,7 +3,7 @@ const request = require('superagent');
 const keys = require('../../config/keys');
 const async = require('async');
 const jwt = require('jsonwebtoken');
-
+const uuidv4 = require('uuid/v4');
 
 function getUsers(req, res) {
     let data = {
@@ -153,18 +153,19 @@ function saveGoogleData(data, cb){
         name: data.name,
         email: data.email,
         picture: data.picture
+        // id: uuidv4()
     }
     let jwt_token = jwt.sign({token: obj}, 'ankit');
     let responseObj = {
-        jwtToken : jwt_token,
-        userData : obj
+        jwtToken : jwt_token
+        // userData : obj
     }
     onboardingDao.addRecord(data.name,data.email,data.picture,jwt_token)
         .then(newdata =>{
-            if(newdata === 'OK')
-                return cb(null, responseObj);
-            else if(newdata === 'Already'){
-                return cb(null, responseObj);
+            if(newdata.msg === 'OK')
+                return cb(null, {responseObj:responseObj,userdata:newdata.user});
+            else if(newdata.msg === 'Already'){
+                return cb(null, {responseObj:responseObj,userdata:newdata.user});
             }
             else{
                 res.status('401').send({                    

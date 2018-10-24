@@ -93,12 +93,15 @@ function checkUser(email){
                     // console.log(results[0]);
                     if(error) {
                         //console.log(error)
-                        reject(error)
+                        reject(error);
                     }
                     else if(results[0]){
                         // console.log("blabla", results[0])
                         // return results;
-                        resolve("true");
+                        resolve({
+                            status: true ,
+                            existionUserData: results[0]
+                        });
                     }
                     else{
                         // console.log("I dont wnat to be here")
@@ -138,9 +141,9 @@ function addRecord(name,email,profilePicUrl,jwtToken){
                     reject(error)
                 }
             });
-            if(data  === "true"){
+            if(data.status  === true){
                 // console.log('Already Exists');
-                resolve('Already');
+                resolve({msg: 'Already', user: data.existionUserData});
             }
             else{
                 let id = uuidv4();
@@ -155,7 +158,7 @@ function addRecord(name,email,profilePicUrl,jwtToken){
                     }
                     else {
                         // console.log('Added');
-                        resolve('OK')
+                        resolve({msg: 'OK', user: newUserRecord})
                     }
                 });
             }
