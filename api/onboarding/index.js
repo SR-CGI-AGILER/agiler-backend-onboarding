@@ -13,4 +13,6 @@ router.get('/api/teams/:teamId', onboardingController.getTeam);
 
 router.get('/api/teams/:teamId/members', onboardingController.getTeamMembers);
 
+router.get('/api/getUserId/:email', onboardingController.getUserIdResponse);
+
 module.exports = router;

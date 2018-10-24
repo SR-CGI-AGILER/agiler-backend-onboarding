@@ -24,10 +24,22 @@ function getAllUsersController(req, res) {
     });
 }
 
+function getUserIdResponse(req, res){
+    let data = {
+        email: req.params.email
+    }
+    onboardingDao.getUserId(data).then(data => {
+        res.status('200').send({
+            payload: data
+        });
+    });
+}
+
 function getTeam(req,res){
     let data = {
         teamId: req.params.teamId
     }
+    // console.log(req.cookie,"In Get Team");
     onboardingDao.findTeam(data).then(data=>{
         res.status('200').send({
            payload: {
@@ -53,7 +65,8 @@ function getTeamMembers(req, res){
 }
 
 function loginWithGoogle(req, res){
-    console.log("WATERFALL.............................")
+    // console.log("WATERFALL.............................")
+    console.log(req.cookie,"Hello");
     async.waterfall([
         async.apply(getGoogleToken, req, res),
         getGoogleUserData,
@@ -248,7 +261,7 @@ function saveData(newdata, cb){
 }
     
 function sendResponse(res, data, cb){
-    console.log(data.jwtToken);
+    // console.log(data.jwtToken;
     res.send(data);
     cb(null);
 }
@@ -259,6 +272,7 @@ module.exports = {
     getUsers,
     getTeam,
     getTeamMembers,
-    getAllUsersController
+    getAllUsersController,
+    getUserIdResponse
     // getGoogleToken
 }

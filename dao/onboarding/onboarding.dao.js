@@ -108,6 +108,21 @@ function checkUser(email){
     })
 }
 
+function getUserId(data){
+    let email = data.email;
+    return new Promise((resolve,reject)=>{
+        dbConnection.connection.query(`SELECT id from user where email="${email}"`,
+        (error,results, fields)=>{
+            if(error){
+                reject(error)
+            }
+            else{
+                resolve(results[0]);
+            }
+        });
+    });
+}
+
 function addRecord(name,email,profilePicUrl,jwtToken){
     // console.log(email,"IN add record");
     return new Promise((resolve,reject)=>{
@@ -154,5 +169,6 @@ module.exports = {
     findRecord,
     findTeam,
     findTeamMembers,
-    findAllUsers
+    findAllUsers,
+    getUserId
 }
