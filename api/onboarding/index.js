@@ -1,5 +1,13 @@
 const router = require('express').Router();
 const onboardingController = require('./onboarding.controller');
+const cookieParser = require('cookie-parser');
+
+router.use(cookieParser());
+
+router.get('/test', (req,res)=>{
+    res.cookie('cook2',"BLABLA");
+    res.send('HEYHEY');
+});
 
 router.post('/auth/google',onboardingController.loginWithGoogle);
 

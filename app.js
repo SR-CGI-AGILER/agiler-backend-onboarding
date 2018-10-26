@@ -1,6 +1,6 @@
 const express = require('express');
 //const request = require('superagent');
-
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 const onboarding = require('./api/onboarding/index');
@@ -16,6 +16,7 @@ app.use(function(req, res, next) {
 });
 
 app.use('/',onboarding);
+//app.use(cookieParser());
 
 
 app.listen('4000', ()=>{

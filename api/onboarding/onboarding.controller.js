@@ -3,7 +3,11 @@ const request = require('superagent');
 const keys = require('../../config/keys');
 const async = require('async');
 const jwt = require('jsonwebtoken');
-const uuidv4 = require('uuid/v4');
+// const uuidv4 = require('uuid/v4');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var express = require('express');
+
 
 function getUsers(req, res) {
     let data = {
@@ -66,7 +70,7 @@ function getTeamMembers(req, res){
 
 function loginWithGoogle(req, res){
     // console.log("WATERFALL.............................")
-    console.log(req.cookie,"Hello");
+    // console.log(req.cookie,"Hello");
     async.waterfall([
         async.apply(getGoogleToken, req, res),
         getGoogleUserData,
@@ -263,7 +267,10 @@ function saveData(newdata, cb){
     
 function sendResponse(res, data, cb){
     // console.log(data.jwtToken;
+    
+    res.cookie('cookie','hello', { secure:false, maxAge:120000, httpOnly: false });
     res.send(data);
+    // res.end('wow');
     cb(null);
 }
 
