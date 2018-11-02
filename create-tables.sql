@@ -12,3 +12,4 @@ CREATE TABLE `agiler`.`team` (
   `memberId` VARCHAR(100) NOT NULL,
   `projectId` VARCHAR(100) NOT NULL,
   PRIMARY KEY (`teamId`, `memberId`, `projectId`));
+create table `agiler`.`session`(`id` VARCHAR(300) NOT NULL, `jwtToken` VARCHAR(745) NULL, PRIMARY KEY(`id`));
