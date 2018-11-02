@@ -43,7 +43,6 @@ function getTeam(req,res){
     let data = {
         teamId: req.params.teamId
     }
-    // console.log(req.cookie,"In Get Team");
     onboardingDao.findTeam(data).then(data=>{
         res.status('200').send({
            payload: {
@@ -69,8 +68,7 @@ function getTeamMembers(req, res){
 }
 
 function loginWithGoogle(req, res){
-    // console.log("WATERFALL.............................")
-    // console.log(req.cookie,"Hello");
+    
     async.waterfall([
         async.apply(getGoogleToken, req, res),
         getGoogleUserData,
@@ -82,7 +80,7 @@ function loginWithGoogle(req, res){
 }
 
 function getGoogleToken(req, res, cb){
-    // console.log("inside get google Token")
+    
     request
     .post('https://www.googleapis.com/oauth2/v3/token')
     .set({
@@ -100,7 +98,6 @@ function getGoogleToken(req, res, cb){
     }).then(data => {
         
         if(data.body.access_token){
-            // console.log(data.body.access_token,"access");
             return cb(null, data.body);
         }
         else{
@@ -159,17 +156,18 @@ function saveGoogleData(data, cb){
         picture: data.picture
         // id: uuidv4()
     }
-    let jwt_token = jwt.sign({token: obj}, 'ankit');
-    let responseObj = {
-        jwtToken : jwt_token
-        // userData : obj
-    }
-    onboardingDao.addRecord(data.name,data.email,data.picture,jwt_token)
+    // let jwt_token = jwt.sign({token: obj}, 'ankit');
+    // let responseObj = {
+    //     jwtToken : jwt_token
+    //     // userData : obj
+    // }
+    onboardingDao.addRecord(data.name,data.email,data.picture)
         .then(newdata =>{
             if(newdata.msg === 'OK')
-                return cb(null, {responseObj:responseObj,userdata:newdata.user});
+                return cb(null, {userdata:newdata.user});
             else if(newdata.msg === 'Already'){
-                return cb(null, {responseObj:responseObj,userdata:newdata.user});
+                console.log("ins")
+                return cb(null, {userdata:newdata.user});
             }
             else{
                 res.status('401').send({                    
@@ -266,12 +264,23 @@ function saveData(newdata, cb){
 }
     
 function sendResponse(res, data, cb){
-    // console.log(data.jwtToken;
+    // // console.log(data.jwtToken;
     
-    res.cookie('cookie','hello', { secure:false, maxAge:120000, httpOnly: false });
-    res.send(data);
-    // res.end('wow');
+    // // res.cookie('cookie','helloSwarnim', { secure:false, maxAge:120000, httpOnly: false }).send(data);
+    // // res.end('wow');
+    // console.log(data.userdata, "sendResponse");
+    
+    let jwt_token = jwt.sign({token: data.userdata}, 'ankit');
+    let responseObj = {
+        jwtToken : jwt_token,
+        userdata : data.userdata
+    }
+    res.send(responseObj);
     cb(null);
+}
+
+function testFun(req, res){
+    res.cookie("cookie", "sdkfjslkdjf").send("skdfjlksad")
 }
 
 module.exports = {
@@ -281,6 +290,7 @@ module.exports = {
     getTeam,
     getTeamMembers,
     getAllUsersController,
-    getUserIdResponse
+    getUserIdResponse,
+    testFun
     // getGoogleToken
 }

@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 const onboarding = require('./api/onboarding/index');
+const ENV = require('./config/environment');
 
 const app = express();
 
@@ -15,10 +16,12 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.use('/',onboarding);
+app.use(ENV.apiEndPoint,onboarding);
 //app.use(cookieParser());
 
-
-app.listen('4000', ()=>{
+console.log(ENV,"lklkljas");
+app.listen('4000', (err)=>{
+    if(err)
+        throw err;
     console.log('Server running on 4000');
 });

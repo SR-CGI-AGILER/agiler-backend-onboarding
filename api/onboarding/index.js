@@ -4,10 +4,7 @@ const cookieParser = require('cookie-parser');
 
 router.use(cookieParser());
 
-router.get('/test', (req,res)=>{
-    res.cookie('cook2',"BLABLA");
-    res.send('HEYHEY');
-});
+router.get('/test', onboardingController.testFun);
 
 router.post('/auth/google',onboardingController.loginWithGoogle);
 
