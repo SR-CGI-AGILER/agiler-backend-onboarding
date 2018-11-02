@@ -12,7 +12,7 @@ RUN npm install
 
 # CMD ["echo", "Hello World"]
 
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=dev
 
 CMD ["npm", "start"]
 
