@@ -2,6 +2,7 @@ const express = require('express');
 //const request = require('superagent');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const connect = require('./db-connection/mysql');
 
 const onboarding = require('./api/onboarding/index');
 const ENV = require('./config/environment');
@@ -20,8 +21,11 @@ app.use(ENV.apiEndPoint,onboarding);
 //app.use(cookieParser());
 
 console.log(ENV,"lklkljas");
-app.listen('4000', (err)=>{
-    if(err)
-        throw err;
-    console.log('Server running on 4000');
+
+connect().then(dbConnection => {
+    app.listen('4000', (err)=>{
+        if(err)
+            throw err;
+        console.log('Server running on 4000');
+    });
 });
